@@ -52,10 +52,6 @@ RELAYER_SECRET_KEY=S...YOUR_SECRET_KEY...
 # Pyth configuration
 PYTH_HERMES_URL=https://hermes.pyth.network
 PYTH_RECEIVER_CONTRACT_ID=C...CONTRACT_ID...
-
-# Price feeds (add your Pyth feed IDs)
-PRICE_FEED_XAUUSD=0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2
-PRICE_FEED_EURUSD=0xa995d00bb36a63cef7fd2c287dc105fc8f3d93779f062f09551b0af3e81ec30b
 ```
 
 ## Adding New Feeds

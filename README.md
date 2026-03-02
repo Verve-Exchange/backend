@@ -58,6 +58,26 @@ PRICE_FEED_XAUUSD=0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee3
 PRICE_FEED_EURUSD=0xa995d00bb36a63cef7fd2c287dc105fc8f3d93779f062f09551b0af3e81ec30b
 ```
 
+## Adding New Feeds
+
+The list of supported feeds and their configuration is centralized in `src/config/constants.ts`. You can modify this file to add, remove, or update feed parameters.
+
+To add a new feed:
+
+1.  Add the feed entry to the `SUPPORTED_FEEDS` array in `src/config/constants.ts`:
+    ```typescript
+    {
+      symbol: "BTCUSD",
+      feedId: "0xe62df6c8b4a85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43",
+      maxStaleness: 60, // seconds
+      maxDeviationBps: 200, // 2% deviation threshold
+    },
+    ```
+2.  Register the new feed on the contract:
+    ```bash
+    npx tsx scripts/register-feeds.ts
+    ```
+
 ## Usage
 
 ### Development (with Nodemon)
@@ -75,6 +95,7 @@ npm run dev:server
 ```
 
 Nodemon features:
+
 - Watches all `.ts` and `.json` files in the `src` directory
 - Automatically restarts when files change
 - Type `rs` in the terminal to manually restart
@@ -120,11 +141,13 @@ pm2 save
 The relayer exposes several health check endpoints:
 
 ### Health Status
+
 ```bash
 curl http://localhost:3000/health
 ```
 
 Returns:
+
 ```json
 {
   "status": "healthy",
@@ -139,16 +162,19 @@ Returns:
 ```
 
 ### Readiness Check
+
 ```bash
 curl http://localhost:3000/ready
 ```
 
 ### Liveness Check
+
 ```bash
 curl http://localhost:3000/live
 ```
 
 ### Prometheus Metrics
+
 ```bash
 curl http://localhost:3000/metrics
 ```
@@ -173,13 +199,13 @@ Import the provided Grafana dashboard for visualization:
 
 ## Supported Price Feeds
 
-| Symbol | Asset | Pyth Feed ID |
-|--------|-------|--------------|
-| XAUUSD | Gold/USD | `0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2` |
+| Symbol | Asset      | Pyth Feed ID                                                         |
+| ------ | ---------- | -------------------------------------------------------------------- |
+| XAUUSD | Gold/USD   | `0x765d2ba906dbc32ca17cc11f5310a89e9ee1f6420508c63861f2f8ba4ee34bb2` |
 | XAGUSD | Silver/USD | `0xf2fb02c32b055c805e7238d628e5e9dadef274376114eb1f012337cabe93871e` |
-| EURUSD | EUR/USD | `0xa995d00bb36a63cef7fd2c287dc105fc8f3d93779f062f09551b0af3e81ec30b` |
-| GBPUSD | GBP/USD | `0x84c2dde9633d93d1bcad84e7dc41c9d56578b7ec52fabedc1f335d673df0a7c1` |
-| USDJPY | USD/JPY | `0xef2c98c804ba503c6a707e38be4dfbb16683775f195b091252bf24693042fd52` |
+| EURUSD | EUR/USD    | `0xa995d00bb36a63cef7fd2c287dc105fc8f3d93779f062f09551b0af3e81ec30b` |
+| GBPUSD | GBP/USD    | `0x84c2dde9633d93d1bcad84e7dc41c9d56578b7ec52fabedc1f335d673df0a7c1` |
+| USDJPY | USD/JPY    | `0xef2c98c804ba503c6a707e38be4dfbb16683775f195b091252bf24693042fd52` |
 
 ## Error Handling
 
@@ -204,11 +230,13 @@ Set log level via `LOG_LEVEL` environment variable.
 ## Cost Estimation
 
 ### Testnet
+
 - Transaction fees: ~0.00001 XLM per update
 - Updates per day: ~17,280 (5-second interval)
 - Daily cost: ~0.17 XLM (~$0.02)
 
 ### Mainnet
+
 - Transaction fees: ~0.00001 XLM per update
 - Updates per day: ~17,280
 - Daily cost: ~0.17 XLM (~$0.02)
@@ -218,6 +246,7 @@ Set log level via `LOG_LEVEL` environment variable.
 ### Relayer won't start
 
 1. Check if account is funded:
+
 ```bash
 curl "https://horizon-testnet.stellar.org/accounts/YOUR_PUBLIC_KEY"
 ```
@@ -272,11 +301,8 @@ backend/
 ### Adding New Price Feeds
 
 1. Get Pyth feed ID from [Pyth Price Feeds](https://pyth.network/developers/price-feed-ids)
-2. Add to `.env`:
-```env
-PRICE_FEED_NEWSYMBOL=0x...feed_id...
-```
-3. Add to `config.ts` in `priceFeeds` array
+2. Add it to `SUPPORTED_FEEDS` in `src/config/constants.ts`.
+3. Run `npx tsx scripts/register-feeds.ts` to register it on-chain.
 
 ### Running Tests
 

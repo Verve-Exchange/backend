@@ -27,6 +27,28 @@ if (!SECRET_KEY || !CONTRACT_ID) {
   process.exit(1);
 }
 
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+async function waitForTxConfirmation(server: rpc.Server, hash: string) {
+  for (let i = 0; i < 20; i++) {
+    try {
+      const tx = await server.getTransaction(hash);
+      if (tx.status === "SUCCESS") {
+        return true;
+      }
+      if (tx.status === "FAILED") {
+        return false;
+      }
+    } catch {
+      // keep polling while tx is not found yet
+    }
+    await sleep(1500);
+  }
+  return false;
+}
+
 async function main() {
   const server = new rpc.Server(RPC_URL);
   const keypair = Keypair.fromSecret(SECRET_KEY);
@@ -40,8 +62,6 @@ async function main() {
   );
 
   try {
-    const account = await server.getAccount(keypair.publicKey());
-
     // Check if initialized first?
     // We can just try to initialize and ignore "Authorized" (AlreadyInitialized) error or similar if we could distinguishing it,
     // but better to just try.
@@ -49,12 +69,14 @@ async function main() {
 
     console.log(`Attempting to initialize contract...`);
     try {
+      const initAccount = await server.getAccount(keypair.publicKey());
+
       const initOp = contract.call(
         "initialize",
         nativeToScVal(keypair.publicKey(), { type: "address" }),
       );
 
-      const initTx = new TransactionBuilder(account, {
+      const initTx = new TransactionBuilder(initAccount, {
         fee: BASE_FEE,
         networkPassphrase: NETWORK_PASSPHRASE,
       })
@@ -68,9 +90,6 @@ async function main() {
         initPrep.sign(keypair);
         const initRes = await server.sendTransaction(initPrep);
         console.log(`Initialization result: ${initRes.status}`);
-        if (initRes.status === "PENDING") {
-          account.incrementSequenceNumber();
-        }
       } else {
         // Likely already initialized or other error
         // check if error is "Unauthorized" or similar which implies initialized
@@ -86,6 +105,7 @@ async function main() {
 
     for (const feed of SUPPORTED_FEEDS) {
       console.log(`Registering ${feed.symbol}...`);
+      const account = await server.getAccount(keypair.publicKey());
 
       // Convert hex string to Buffer for Bytes
       const feedIdBuffer = Buffer.from(feed.feedId.replace("0x", ""), "hex");
@@ -128,9 +148,12 @@ async function main() {
       }
 
       console.log(`Submitted ${feed.symbol}: ${response.hash}`);
-
-      // Increase sequence number for next tx
-      account.incrementSequenceNumber();
+      const confirmed = await waitForTxConfirmation(server, response.hash);
+      if (!confirmed) {
+        console.error(
+          `Transaction not confirmed for ${feed.symbol}: ${response.hash}`,
+        );
+      }
     }
   } catch (err) {
     console.error("Error:", err);

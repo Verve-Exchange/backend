@@ -13,7 +13,7 @@ import { MissingEnvVarError, InvalidEnvVarError } from "../utils/errors";
 // Load environment variables at module initialization
 loadEnv();
 
-import { SUPPORTED_FEEDS, PriceFeedInfo } from "../constants";
+import { SUPPORTED_FEEDS, PriceFeedInfo } from "./constants";
 
 export interface PriceFeedConfig {
   symbol: string;

@@ -11,6 +11,8 @@
     "start": "node dist/index.js",
     "start:server": "node dist/server.js",
     "start:relayer": "node dist/index.js",
+    "prepare": "husky",
+    "commitlint": "commitlint",
     "test": "jest",
     "lint": "eslint src --ext .ts",
     "format": "prettier --write \"src/**/*.ts\""
@@ -32,6 +34,8 @@
     "pino-pretty": "^11.0.0"
   },
   "devDependencies": {
+    "@commitlint/cli": "^20.4.2",
+    "@commitlint/config-conventional": "^20.4.2",
     "@types/dotenv": "^8.2.3",
     "@types/express": "^4.17.21",
     "@types/node": "^20.12.7",
@@ -39,6 +43,7 @@
     "@typescript-eslint/parser": "^7.7.0",
     "dotenv": "^16.4.5",
     "eslint": "^8.57.0",
+    "husky": "^9.1.7",
     "nodemon": "^3.1.14",
     "prettier": "^3.2.5",
     "ts-node": "^10.9.2",
